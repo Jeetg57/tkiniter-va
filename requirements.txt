@@ -1,0 +1,7 @@
+imutils==0.5.4
+keras==2.7.0
+keras_nightly==2.5.0.dev2021032900
+numpy==1.19.5
+opencv_python==4.5.1.48
+Pillow==8.4.0
+tk==0.1.0
