@@ -1,3 +1,4 @@
 {
-  "azureML.defaultWorkspaceId": "/subscriptions/a56ab127-8316-4eae-af9f-abcbf2c14b02/resourceGroups/VisionAutocorrect/providers/Microsoft.MachineLearningServices/workspaces/VisionAutocorrect"
+  "azureML.defaultWorkspaceId": "/subscriptions/a56ab127-8316-4eae-af9f-abcbf2c14b02/resourceGroups/VisionAutocorrect/providers/Microsoft.MachineLearningServices/workspaces/VisionAutocorrect",
+  "python.formatting.provider": "black"
 }

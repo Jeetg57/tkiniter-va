@@ -18,12 +18,14 @@ import tkinter.font as tkFont
 import threading
 import xml.etree.ElementTree as ET
 from time import sleep
+
 # load model
 model = model_from_json(open("fer_tt8a.json", "r").read())
 # load weights
-model.load_weights('fer_tt8a.h5')
+model.load_weights("fer_tt8a.h5")
 face_haar_cascade = cv2.CascadeClassifier(
-    cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
+    cv2.data.haarcascades + "haarcascade_frontalface_default.xml"
+)
 
 
 class VisionAutocorrectApp:
@@ -50,29 +52,48 @@ class VisionAutocorrectApp:
         self.root.wm_protocol("WM_DELETE_WINDOW", self.onClose)
 
         self.fontStyle = tkFont.Font(family="Lucida Grande", size=9)
+        self.backcolor = "#ff0000"
+        self.frontcolor = "#00ff00"
+
         self.labelExample = Text(
-            self.root, font=self.fontStyle, width=150, height=20, wrap=WORD, padx=10, pady=10)
-        self.labelExample.insert(INSERT, "Strange Bedfellows!” lamented the title of a recent letter to Museum News, in which a certain Harriet Sherman excoriated the National Gallery of Art in Washington for its handling of tickets to the much-ballyhooed “Van Gogh’s van Goghs” exhibit. A huge proportion of the 200, 000 free tickets were snatched up by the opportunists in the dead of winter, who then scalped those tickets at $85 apiece to less hardy connoiseurs.Yet, Sherman’s bedfellows are far from strange. Art, despite its religious and magical origins, very soon became a commercial venture. From bourgeois patrons funding art they barely understood in order to share their protegee’s prestige, to museum curators stage-managing the cult of artists in order to enhance the market value of museum holdings, entrepreneurs have found validation and profit in big-name art. Speculators, thieves, and promoters long ago created and fed a market where cultural icons could be traded like commodities.")
+            self.root,
+            font=self.fontStyle,
+            width=150,
+            height=20,
+            wrap=WORD,
+            padx=10,
+            bg=self.backcolor,
+            fg=self.frontcolor,
+            pady=10,
+        )
+        self.labelExample.insert(
+            INSERT,
+            "Strange Bedfellows!” lamented the title of a recent letter to Museum News, in which a certain Harriet Sherman excoriated the National Gallery of Art in Washington for its handling of tickets to the much-ballyhooed “Van Gogh’s van Goghs” exhibit. A huge proportion of the 200, 000 free tickets were snatched up by the opportunists in the dead of winter, who then scalped those tickets at $85 apiece to less hardy connoiseurs.Yet, Sherman’s bedfellows are far from strange. Art, despite its religious and magical origins, very soon became a commercial venture. From bourgeois patrons funding art they barely understood in order to share their protegee’s prestige, to museum curators stage-managing the cult of artists in order to enhance the market value of museum holdings, entrepreneurs have found validation and profit in big-name art. Speculators, thieves, and promoters long ago created and fed a market where cultural icons could be traded like commodities.",
+        )
         self.labelExample.pack(side=tki.BOTTOM)
 
     def scheduleTaskSnap(self):
         while not self.stopEvent.is_set():
             try:
-                self.classifyImage()
                 sleep(2)
+                self.classifyImage()
             except RuntimeError as e:
                 print("[INFO] caught a RuntimeError")
 
     def increase_label_font(self):
-        fontsize = self.fontStyle['size']
-        self.fontStyle.configure(size=fontsize+1)
+        fontsize = self.fontStyle["size"]
+        self.fontStyle.configure(size=fontsize + 1)
+
+    def change_colors(self):
+        self.backcolor = "#ffffff"
+        self.frontcolor = "#000000"
+        self.labelExample.config(bg=self.backcolor, fg=self.frontcolor)
 
     def videoLoop(self):
         try:
             while not self.stopEvent.is_set():
                 self.frame = self.vs.read()
-                self.frame = imutils.resize(
-                    self.frame, height=700)
+                self.frame = imutils.resize(self.frame, height=700)
 
                 # OpenCV represents images in BGR order; however PIL
                 # represents images in RGB order, so we need to swap
@@ -85,8 +106,9 @@ class VisionAutocorrectApp:
                 if self.panel is None:
                     self.panel = tki.Label(image=image)
                     self.panel.image = image
-                    self.panel.pack(side="left", padx=10,
-                                    pady=10, expand="yes", fill="both")
+                    self.panel.pack(
+                        side="left", padx=10, pady=10, expand="yes", fill="both"
+                    )
                 # otherwise, simply update the panel
                 else:
                     self.panel.configure(image=image)
@@ -97,7 +119,6 @@ class VisionAutocorrectApp:
     def takeSnapshot(self):
         # grab the current timestamp and use it to construct the
         # output path
-        self.increase_label_font
         ts = datetime.datetime.now()
         filename = "{}.jpg".format(ts.strftime("%Y-%m-%d_%H-%M-%S"))
         p = os.path.sep.join((self.outputPath, filename))
@@ -115,8 +136,8 @@ class VisionAutocorrectApp:
             faces_detected = face_haar_cascade.detectMultiScale(gray_img)
             for (x, y, w, h) in faces_detected:
                 roi_gray = gray_img[
-                    y:y + w,
-                    x:x + h]  # cropping region of interest i.e. face area from  image
+                    y : y + w, x : x + h
+                ]  # cropping region of interest i.e. face area from  image
                 roi_gray = cv2.resize(roi_gray, (48, 48))
                 img_pixels = image.img_to_array(roi_gray)
                 img_pixels = np.expand_dims(img_pixels, axis=0)
@@ -126,7 +147,7 @@ class VisionAutocorrectApp:
                 # find max indexed array
                 max_index = np.argmax(predictions[0])
                 # print(max_index)
-                emotions = ('None', 'Fatigue', 'Glare', 'Normal', 'Squint')
+                emotions = ("None", "Fatigue", "Glare", "Normal", "Squint")
                 predicted_emotion = emotions[max_index]
                 print(predicted_emotion)
                 # print(predicted_emotion)
@@ -135,8 +156,7 @@ class VisionAutocorrectApp:
                 return True
             self.remove_img(file)
         except:
-            messagebox.showwarning(
-                "Error", "An error occured when classifying")
+            messagebox.showwarning("Error", "An error occured when classifying")
 
     def remove_img(self, img_name):
         os.remove(img_name)
@@ -146,30 +166,38 @@ class VisionAutocorrectApp:
             return True
 
     def parseRules(self, category):
-        tree = ET.parse('rules.xml')
+        tree = ET.parse("rules.xml")
         root = tree.getroot()
         for child in root:
-            if(child.attrib["category"] == category):
-                if(child[2].text == child[0].text):
+            if child.attrib["category"] == category:
+                if child[2].text == child[0].text:
                     answer = messagebox.askyesno(
-                        title=child.attrib["category"], message=child[1].text)
+                        title=child.attrib["category"], message=child[1].text
+                    )
                     if answer:
-                        self.increase_label_font()
+                        if category == "Fatigue":
+                            self.onClose()
+                        else:
+                            self.increase_label_font()
+                            if self.backcolor != "#ffffff":
+                                self.change_colors()
+                                messagebox.showinfo(
+                                    title="Colors Changed",
+                                    message="We have adjusted the colors for a better viewing experience",
+                                )
                     child[2].text = str(0)
                 else:
                     child[2].text = str(int(child[2].text) + 1)
         tree.write("rules.xml")
 
     def setZeros(self):
-        tree = ET.parse('rules.xml')
+        tree = ET.parse("rules.xml")
         root = tree.getroot()
         for child in root:
             child[2].text = str(0)
         tree.write("rules.xml")
 
     def onClose(self):
-        # set the stop event, cleanup the camera, and allow the rest of
-        # the quit process to continue
         print("[INFO] closing...")
         self.stopEvent.set()
         self.vs.stop()
