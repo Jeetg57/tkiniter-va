@@ -94,14 +94,9 @@ class VisionAutocorrectApp:
             while not self.stopEvent.is_set():
                 self.frame = self.vs.read()
                 self.frame = imutils.resize(self.frame, height=700)
-
-                # OpenCV represents images in BGR order; however PIL
-                # represents images in RGB order, so we need to swap
-                # the channels, then convert to PIL and ImageTk format
                 image = cv2.cvtColor(self.frame, cv2.COLOR_BGR2RGB)
                 image = Image.fromarray(image)
                 image = ImageTk.PhotoImage(image)
-
                 # if the panel is not None, we need to initialize it
                 if self.panel is None:
                     self.panel = tki.Label(image=image)
@@ -109,7 +104,6 @@ class VisionAutocorrectApp:
                     self.panel.pack(
                         side="left", padx=10, pady=10, expand="yes", fill="both"
                     )
-                # otherwise, simply update the panel
                 else:
                     self.panel.configure(image=image)
                     self.panel.image = image
@@ -170,7 +164,7 @@ class VisionAutocorrectApp:
         root = tree.getroot()
         for child in root:
             if child.attrib["category"] == category:
-                if child[2].text == child[0].text:
+                if child[2].text == child[0].text - 1:
                     answer = messagebox.askyesno(
                         title=child.attrib["category"], message=child[1].text
                     )
